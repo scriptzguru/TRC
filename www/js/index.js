@@ -46,7 +46,7 @@ var app = {
 
         console.log('Received Event: ' + id);
 				
-   var url = 'https://cordova.apache.org';
+   var url = 'https://ccitutors.com:3205/demos/stok5.html';
    var target = '_system';
    var options = "location = yes"
    var ref = cordova.InAppBrowser.open(url, target, options);
