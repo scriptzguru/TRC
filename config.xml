@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.phonegap.helloworld" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
-    <name>Self Notification</name>
+    <name>Eric RTC</name>
     <description>
-        Self Notification application that responds to the deviceready event.
+        Eric Easy RTC
     </description>
-    <author email="support@phonegap.com" href="http://phonegap.com">
-        PhoneGap Team
+    <author email="appliedknowl@gmail.com" href="http://phonegap.com">
+        Sachin Chakravarthy  - Scriptzguru
     </author>
     <content src="index.html" />
     <preference name="DisallowOverscroll" value="true" />
