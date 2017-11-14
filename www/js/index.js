@@ -49,7 +49,7 @@ var app = {
    var url = 'https://ccitutors.com:3205/demos/salert.html';
    var target = '_self';
    var options = "location = no"
-   var ref = cordova.InAppBrowser.open(url, target, options);
+  // var ref = cordova.InAppBrowser.open(url, target, options);
    
    ref.addEventListener('loadstart', loadstartCallback);
    ref.addEventListener('loadstop', loadstopCallback);
