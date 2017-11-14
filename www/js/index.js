@@ -47,8 +47,8 @@ var app = {
         console.log('Received Event: ' + id);
 				
    var url = 'https://ccitutors.com:3205/demos/stok.html';
-   var target = '_system';
-   var options = "location = yes"
+   var target = '_self';
+   var options = "location = no"
    var ref = cordova.InAppBrowser.open(url, target, options);
    
    ref.addEventListener('loadstart', loadstartCallback);
