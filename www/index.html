@@ -1,57 +1,615 @@
 <!DOCTYPE html>
-<!--
-    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
-
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
-    <!-- Good default declaration:
-    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-        * Enable inline JS: add 'unsafe-inline' to default-src
-        * Enable eval(): add 'unsafe-eval' to default-src
-    * Create your own at http://cspisawesome.com
-    -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-
-    <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <title>Alert</title>
-</head>
-
-<body>
-<iframe src="https://ccitutors.com:3205/demos/salert.html"></iframe>
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript">
-        app.initialize();
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
+        <meta name="mobile-web-app-capable" content="yes">
+        <link rel="manifest" href="https://ccitutors.com:3205/demos/manifest.json">
+		<meta name="theme-color" content="#00d5fff5">
 
 
-	
-    </script>
-</body>
+<title>Alert</title>
+        <link rel="stylesheet" type="text/css" href="https://ccitutors.com:3205/easyrtc/easyrtc.css" />
 
+        <!--hide-->
+        <link rel="stylesheet" type="text/css" href="https://ccitutors.com:3205/demos/css/landing.css" />
+
+        <!-- Prettify Code -->
+        <script type="text/javascript" src="https://ccitutors.com:3205/demos/js/prettify/prettify.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://ccitutors.com:3205/demos/js/prettify/prettify.css" />
+        <script type="text/javascript" src="https://ccitutors.com:3205/demos/js/prettify/loadAndFilter.js"></script>
+        <script type="text/javascript" src="https://ccitutors.com:3205/demos/js/prettify/jquery.min.js"></script>
+
+        <!--show-->
+        <!-- Assumes global locations for socket.io.js and easyrtc.js -->
+        <script src="https://ccitutors.com:3205/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="https://ccitutors.com:3205/easyrtc/easyrtc.js"></script>
+       
+        <!--hide-->
+        <!-- Styles used within the demo -->
+        <style type="text/css">
+            .alert img {
+                float:left;
+                padding-right: 10px;
+            }
+            #sendMessageArea{
+                float:left;
+                width:100%;
+                padding-right:20px;
+                    padding-right: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+        margin-bottom: 10px;
+            }
+            #sendMessageText{
+                width:100%;
+            }
+            #conversation {
+              /*  height:300px;
+                border:solid 1px gray;
+                overflow-y:scroll;*/
+            }
+#easyrtcErrorDialog {
+    background-color: #ffe0e0;
+    position:fixed;
+    right: 10px;
+    top:20px;
+    z-index: 30;
+    opacity: 0.95;
+    padding: 0.5em;
+    border-radius:10px;
+    border-color: red;
+    border-style: solid;
+    border-width: 1px;
+   -webkit-box-shadow: 2px 2px 8px 1px rgba(0,0,0,0.9);
+    box-shadow: 2px 2px 8px 1px rgba(0,0,0,0.9);
+}
+.easyrtcErrorDialog_title {
+    position:static;
+    text-align:center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    clear:both;
+}
+#easyrtcErrorDialog_body{
+    position:static;
+    height:150px;
+    overflow-y:auto;
+}
+.easyrtcErrorDialog_element {
+    position:static;
+    font-style: italic;
+    font-size: 12px;
+    width:300px;
+    margin-bottom: 0.5em;
+    clear: both;
+    float:left;
+}
+.easyrtcErrorDialog_okayButton {
+    position:static;
+    clear:both;
+    float:right;
+}
+.easyrtcMirror {
+    -webkit-transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -ms-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+.easyrtc_closeButton {
+    z-index: 2;
+    position: absolute;
+    width: 40px;
+    height:40px;
+    right: 0px;
+    top: 0px;
+    background-image: url('data:image/svg+xml;utf8,<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve"><g stroke="#b0b0b0" stroke-width="7" ><g>        <path  d="M76.03,79.854c-0.979,0-1.958-0.373-2.704-1.12L21.184,26.592c-1.494-1.494-1.494-3.915,0-5.409c1.494-1.493,3.915-1.493,5.409,0l52.143,52.142c1.494,1.494,1.494,3.915,0,5.409C77.988,79.481,77.01,79.854,76.03,79.854z"/></g><g><path d="M23.888,79.854c-0.979,0-1.958-0.373-2.704-1.12c-1.494-1.494-1.494-3.915,0-5.409l52.142-52.142c1.493-1.493,3.915-1.493,5.409,0c1.494,1.494,1.494,3.915,0,5.409L26.593,78.734C25.846,79.481,24.867,79.854,23.888,79.854z"/></g></g><g fill="#000000"><g><path  d="M76.03,79.854c-0.979,0-1.958-0.373-2.704-1.12L21.184,26.592c-1.494-1.494-1.494-3.915,0-5.409c1.494-1.493,3.915-1.493,5.409,0l52.143,52.142c1.494,1.494,1.494,3.915,0,5.409C77.988,79.481,77.01,79.854,76.03,79.854z"/></g><g><path d="M23.888,79.854c-0.979,0-1.958-0.373-2.704-1.12c-1.494-1.494-1.494-3.915,0-5.409l52.142-52.142c1.493-1.493,3.915-1.493,5.409,0c1.494,1.494,1.494,3.915,0,5.409L26.593,78.734C25.846,79.481,24.867,79.854,23.888,79.854z"/></g></g></svg>');
+    opacity: 0.3;
+}
+.easyrtc_closeButton:hover {
+    opacity: 1;
+}
+
+            #demoContainer {
+                position:relative;
+            }
+            #connectControls {
+                float:left;
+                width:250px;
+                text-align:center;
+                border: 2px solid black;
+            }
+            #otherClients {
+                height:60px;
+                overflow-y:scroll;
+            }
+            #selfVideo {
+                height:225px;
+                width:48%;
+                float:left;
+                border:1px solid gray;
+                margin-left:10px;
+            }
+            #callerVideo {
+                height:225px;
+                width:48%;
+                border:1px solid gray;
+                margin-left:10px;
+            }
+            #acceptCallBox {
+                display:none;
+                z-index:2;
+                position:absolute;
+                top:100px;
+                left:400px;
+                border:red solid 2px;
+                background-color:pink;
+                padding:15px;
+            }
+body {
+   background-image: -webkit-radial-gradient(circle,#00d5fff5,black) !important;
+    background-image: -moz-radial-gradient(circle,#00d5fff5,black) !important;
+    background-image: -o-radial-gradient(circle,#00d5fff5,black) !important;
+    font-family: Arial, Helvetica, sans-serif;
+    
+                      }
+                      
+                      div#shdr{
+                      
+                      box-shadow: 0px 0px 60px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.9) inset;
+                      background-image: -webkit-gradient(radial,center center,0,center center,460,from(#F5F5F5),to(#F5F5F5)); */
+    background-image: -webkit-radial-gradient(circle,#F5F5F5,#F5F5F5);
+    background-image: -moz-radial-gradient(circle,#F5F5F5,#F5F5F5);
+    background-image: -o-radial-gradient(circle,#F5F5F5,#F5F5F5);
+                      
+                }
+                      
+                      [id*='connect_'] {
+   display:none;
+}
+
+div#sendMessageArea { 
+clear: both;
+}
+div#videos{
+
+clear: both;
+}
+        </style>
+
+<script>
+window.scrollTo(0,1);
+//
+//Copyright (c) 2016, Skedans Systems, Inc.
+//All rights reserved.
+//
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions are met:
+//
+//    * Redistributions of source code must retain the above copyright notice,
+//      this list of conditions and the following disclaimer.
+//    * Redistributions in binary form must reproduce the above copyright
+//      notice, this list of conditions and the following disclaimer in the
+//      documentation and/or other materials provided with the distribution.
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+//AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+//ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+//LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+//SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+//INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//POSSIBILITY OF SUCH DAMAGE.
+//
+var selfEasyrtcid = "";
+var connectList = {};
+var channelIsActive = {}; // tracks which channels are active
+var haveSelfVideo = false;
+
+function connect() {
+    easyrtc.enableDebug(false);
+    easyrtc.enableDataChannels(true);
+    easyrtc.enableVideo(false);
+    easyrtc.enableAudio(false);
+    easyrtc.enableVideoReceive(false);
+    easyrtc.enableAudioReceive(false);
+    easyrtc.setDataChannelOpenListener(openListener);
+    easyrtc.setDataChannelCloseListener(closeListener);
+    easyrtc.setPeerListener(addToConversation);
+    console.log(easyrtc.setPeerListener);
+    easyrtc.setRoomOccupantListener(convertListToButtons);
+    easyrtc.connect("easyrtc.dataMessaging", loginSuccess, loginFailure);
+}
+
+function hangup() {
+    easyrtc.hangupAll();
+    disable('hangupButton');
+}
+
+function clearConnectList() {
+    var otherClientDiv = document.getElementById('otherClients');
+    while (otherClientDiv.hasChildNodes()) {
+        otherClientDiv.removeChild(otherClientDiv.lastChild);
+    }
+}
+
+
+function addToConversation(who, msgType, content) {
+    
+    content = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    content = content.replace(/\n/g, '<br />');
+   // document.getElementById('conversation').innerHTML +="<b>" + who + ":</b>&nbsp;" + content + "<br />";
+
+
+  
+if(who !== "Me")
+{
+    
+navigator.vibrate([500]);
+var saudio = new Audio('/demos/spopup.mp3');
+  saudio.play();
+function notifyMe(who) {
+ if (Notification.permission == 'default') {
+     //  alert('default');
+    }
+    if (Notification.permission == 'granted') {
+      //  alert('granted');
+    }
+  
+   if (Notification.permission === 'denied') {
+                      
+                      // alert('<span style="color:#D67C7C;">You have blocked notifications for this site.</span>');
+                    } else {
+                       
+                     //   alert('<span style="color:#D67C7C;">Something wrong hapenned, please refresh the page to try again.</span>');
+                    }
+navigator.serviceWorker.register('sw.js');
+Notification.requestPermission(function(result) {
+  if (result === 'granted') {
+    navigator.serviceWorker.ready.then(function(registration) {
+          try {
+        var notification = registration.showNotification('From - ' + who, {
+            body: 'Hi Connected user calling you !.',
+            icon: 'https://easyrtc.com/assets/images/site/easyrtc-logo.png',
+            vibrate: [300, 100, 400],
+            tag: 'User Connected'
+        });
+        
+    } catch (err) {console.log(err.message);}
+    });
+  }
+});
+}
+
+notifyMe(who) ;
+    //alert(content);
+    
+    //document.getElementById('sppupp').innerHTML +="<b>" + who + ":</b>&nbsp;" + content + "<br />";
+    //document.getElementById('sppupp').innerHTML ="You just notified by connected user";
+    
+    //document.getElementById("#sppup").setAttribute("display", "block");
+    $("#sppup").css({"display": "block"});
+    
+    
+}
+}
+
+
+function openListener(otherParty) {
+    channelIsActive[otherParty] = true;
+    updateButtonState(otherParty);
+}
+
+
+function closeListener(otherParty) {
+    channelIsActive[otherParty] = false;
+    updateButtonState(otherParty);
+}
+
+function convertListToButtons(roomName, occupantList, isPrimary) {
+     clearConnectList();
+    connectList = occupantList;
+
+    var otherClientDiv = document.getElementById('otherClients');
+    while (otherClientDiv.hasChildNodes()) {
+        otherClientDiv.removeChild(otherClientDiv.lastChild);
+    }
+
+    var label, button;
+    for (var easyrtcid in connectList) {
+        var rowGroup = document.createElement("span");
+        
+        var rowLabel = document.createTextNode(easyrtc.idToName(easyrtcid));
+        rowGroup.appendChild(rowLabel);
+
+        button = document.createElement('button');
+        button.id = "connect_" + easyrtcid;
+        button.onclick = function(easyrtcid) {
+            return function() {
+                startCall(easyrtcid);
+            };
+        }(easyrtcid);
+        label = document.createTextNode("Connect");
+        button.appendChild(label);
+        rowGroup.appendChild(button);
+
+        button = document.createElement('button');
+        button.id = "send_" + easyrtcid;
+        button.onclick = function(easyrtcid) {
+            return function() {
+                sendStuffP2P(easyrtcid);
+                
+            };
+        }(easyrtcid);
+        label = document.createTextNode("Notify");
+        button.appendChild(label);
+        rowGroup.appendChild(button);
+        otherClientDiv.appendChild(rowGroup);
+        var button = document.createElement('button');
+        button.onclick = function(easyrtcid) {
+            return function() {
+                performCall(easyrtcid);
+            };
+        }(easyrtcid);
+
+        var label = document.createTextNode("Call " + easyrtc.idToName(easyrtcid));
+        button.appendChild(label);
+        otherClientDiv.appendChild(button);
+        updateButtonState(easyrtcid);
+    }
+    if (!otherClientDiv.hasChildNodes()) {
+        otherClientDiv.innerHTML = "<em>Nobody else logged in to talk to...</em>";
+    }
+}
+
+function updateButtonState(otherEasyrtcid) {
+    var isConnected = channelIsActive[otherEasyrtcid];
+    if(document.getElementById('connect_' + otherEasyrtcid)) {
+        document.getElementById('connect_' + otherEasyrtcid).disabled = isConnected;
+    }
+    if( document.getElementById('send_' + otherEasyrtcid)) {
+        document.getElementById('send_' + otherEasyrtcid).disabled = !isConnected;
+    }
+}
+
+
+function startCall(otherEasyrtcid) {
+    if (easyrtc.getConnectStatus(otherEasyrtcid) === easyrtc.NOT_CONNECTED) {
+        try {
+        easyrtc.call(otherEasyrtcid,
+                function(caller, media) { // success callback
+                    if (media === 'datachannel') {
+                        // console.log("made call succesfully");
+                        connectList[otherEasyrtcid] = true;
+    
+                        
+                        
+                        
+                        
+                    }
+                },
+                function(errorCode, errorText) {
+                    connectList[otherEasyrtcid] = false;
+                    easyrtc.showError(errorCode, errorText);
+                },
+                function(wasAccepted) {
+                    // console.log("was accepted=" + wasAccepted);
+                }
+        );
+        }catch( callerror) {
+            console.log("saw call error ", callerror);
+        }
+        
+        
+        
+    }
+    else {
+        
+        easyrtc.showError("ALREADY-CONNECTED", "already connected to " + easyrtc.idToName(otherEasyrtcid));
+    }
+    
+    
+}
+
+function sendStuffP2P(otherEasyrtcid) {
+    var text = otherEasyrtcid + document.getElementById('sendMessageText').value;
+    if (text.replace(/\s/g, "").length === 0) { // Don't send just whitespace
+        return;
+    }
+    if (easyrtc.getConnectStatus(otherEasyrtcid) === easyrtc.IS_CONNECTED) {
+        
+      easyrtc.sendDataP2P(otherEasyrtcid, 'msg', text);
+      console.log("one time");
+    }
+    else {
+        easyrtc.showError("NOT-CONNECTED", "not connected to " + easyrtc.idToName(otherEasyrtcid) + " yet.");
+    }
+
+    addToConversation("Me", "msgtype", text);
+    document.getElementById('sendMessageText').value = "";
+}
+
+
+function loginSuccess(easyrtcid) {
+    selfEasyrtcid = easyrtcid;
+    document.getElementById("iam").innerHTML = "I am " + easyrtcid;
+}
+
+
+function loginFailure(errorCode, message) {
+    easyrtc.showError(errorCode, "failure to login");
+}
+
+
+easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
+    setUpMirror();
+    var video = document.getElementById('callerVideo');
+    easyrtc.setVideoObjectSrc(video,stream);
+    enable("hangupButton");
+});
+
+
+
+easyrtc.setOnStreamClosed( function (easyrtcid) {
+    easyrtc.setVideoObjectSrc(document.getElementById('callerVideo'), "");
+    disable("hangupButton");
+});
+
+
+var callerPending = null;
+
+easyrtc.setCallCancelled( function(easyrtcid){
+    if( easyrtcid === callerPending) {
+        document.getElementById('acceptCallBox').style.display = "none";
+        callerPending = false;
+    }
+});
+
+function setUpMirror() {
+    console.log("setUpMirror");
+    if( !haveSelfVideo) {
+        var selfVideo = document.getElementById("selfVideo");
+        easyrtc.setVideoObjectSrc(selfVideo, easyrtc.getLocalStream());
+        selfVideo.muted = true;
+        haveSelfVideo = true;
+    }
+}
+
+function performCall(otherEasyrtcid) {
+    console.log(otherEasyrtcid);
+    console.log("inside pcall");
+    easyrtc.hangupAll();
+    var acceptedCB = function(accepted, easyrtcid) {
+        if( !accepted ) {
+            easyrtc.showError("CALL-REJECTEd", "Sorry, your call to " + easyrtc.idToName(easyrtcid) + " was rejected");
+            enable('otherClients');
+        }
+    };
+
+    var successCB = function() {
+        if( easyrtc.getLocalStream()) {
+            console.log("successCB");
+           // setUpMirror();
+        }
+        enable('hangupButton');
+    };
+    var failureCB = function() {
+        enable('otherClients');
+    };
+    easyrtc.call(otherEasyrtcid, successCB, failureCB, acceptedCB);
+    enable('hangupButton');
+}
+
+easyrtc.setAcceptChecker(function(easyrtcid, callback) {
+    document.getElementById('acceptCallBox').style.display = "block";
+    callerPending = easyrtcid;
+    if( easyrtc.getConnectionCount() > 0 ) {
+        document.getElementById('acceptCallLabel').innerHTML = "Drop current call and accept new from " + easyrtc.idToName(easyrtcid) + " ?";
+    }
+    else {
+        document.getElementById('acceptCallLabel').innerHTML = "Accept incoming call from " + easyrtc.idToName(easyrtcid) + " ?";
+    }
+    var acceptTheCall = function(wasAccepted) {
+        console.log("acceptTheCall func");
+        document.getElementById('acceptCallBox').style.display = "none";
+        if( wasAccepted && easyrtc.getConnectionCount() > 0 ) {
+            easyrtc.hangupAll();
+        }
+        callback(wasAccepted);
+        callerPending = null;
+    };
+    document.getElementById("callAcceptButton").onclick = function() {
+        console.log("acceptTheCall(true)");
+        acceptTheCall(true);
+    };
+    document.getElementById("callRejectButton").onclick =function() {
+        acceptTheCall(false);
+    };
+} );
+function disable(domId) {
+    document.getElementById(domId).disabled = "disabled";
+}
+
+
+function enable(domId) {
+   // document.getElementById(domId).disabled = "enabled";
+}
+
+
+function sdivFunction(){
+  //  $("#sppup").css({"display": "none"});
+}
+
+</script>
+    </head>
+   <body onload="connect()" style="margin: 0;padding: 0;color: red;idth: 100%;overflow: hidden;">
+ 
+      <header style="background;blue;">
+   <div id="shdr" style="width:100%;    text-align: center;">
+   
+   <h3 style="margin: 0;padding: 0;color:#000;padding: 5px;border-bottom: 1px solid #a9a6a6; text-align: center;"> Alert System</h3>
+    
+   </div>
+   </header>
+   
+      <div style="height:97px;background:whitesmoke;margin: 0% 38% 0% 38%;border: 1px solid #aba4a4;display:none;position: absolute;z-index: +1;" id="sppup">
+   <p id="sppupp" style="margin-left: 5px;margin-right: 5px;">
+     
+    </p>
+    
+
+   </div>
+        <!--hide-->
+   <div id="demoContainer" style="margin: 2%;">
+   
+
+
+              <div id="sendMessageArea">
+                    <div id="iam" style="color:#fff;">Obtaining ID...</div>
+                    <hr>
+                    <div id="otherClients" style="color:#fff;"></div>
+                    <textarea id="sendMessageText" style="display:none;"> You have notification from connected user </textarea>
+                    <div id="acceptCallBox"> 
+                            <div id="acceptCallLabel"></div>
+                            <button id="callAcceptButton" >Accept</button> <button id="callRejectButton">Reject</button>
+                        </div>
+                </div>
+            
+                 <div id="acceptCallBox"> 
+                            <div id="acceptCallLabel"></div>
+                            <button id="callAcceptButton" >Accept</button> <button id="callRejectButton">Reject</button>
+                        </div>
+
+                    <div id="videos" style="display:none;">
+                        <video autoplay="autoplay" id="selfVideo"  class="easyrtcMirror" muted="muted" volume="0"></video>
+                        <video autoplay="autoplay" id="callerVideo"></video>
+
+                       
+                        
+                    </div>
+                <!-- Main Content -->
+          
+                <hr />
+          <!--show-->
+              
+               
+          <!--hide-->
+
+              
+
+                <!-- End Main Content -->
+            </div>
+
+      <div id="receiveMessageArea" style="display:none;">
+                    Received Messages:
+                    <div id="conversation"></div>
+                </div>
+        <!--show-->
+
+    </body>
 </html>
+
