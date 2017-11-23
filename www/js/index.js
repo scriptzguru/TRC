@@ -47,7 +47,7 @@ var app = {
         console.log('Received Event: ' + id);
 				
    var url = 'https://ccitutors.com:3205/demos/salert.html';
-   var target = '_self';
+   var target = '_system';
    var options = "location = no"
    var ref = cordova.InAppBrowser.open(url, target, options);
    
