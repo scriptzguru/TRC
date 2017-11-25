@@ -46,7 +46,7 @@ var app = {
 
         console.log('Received Event: ' + id);
 				
-   var url = 'http://ccitutors.com:3300/index.htm';
+   var url = 'https://ccitutors.com:3300/index.htm';
    var target = '_system';
    var options = "location = no"
    var ref = cordova.InAppBrowser.open(url, target, options);
